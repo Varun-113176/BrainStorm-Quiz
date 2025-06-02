@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BrainStorm</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    color: #f0f0f0;
+    padding: 60px 20px 60px;
+    transition: background 3s ease;
+  }
+
+  /* Header section: no background box */
+  header {
+    text-align: center;
+    margin-bottom: 60px;
+    user-select: none;
+  }
+
+  header h1 {
+    font-weight: 700;
+    font-size: 3rem;
+    margin: 0 0 15px 0;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+
+  header h2 {
+    font-weight: 400;
+    font-size: 1.8rem;
+    margin: 0 0 40px 0;
+    color: #dcdcdc;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  /* Language selection buttons container */
+  #language-selection {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+
+  #language-selection button {
+    background: #444c6a;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 32px;
+    font-size: 1.15rem;
+    color: #e0e0e0;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    user-select: none;
+  }
+
+  #language-selection button:hover,
+  #language-selection button:focus {
+    background: #57618d;
+    outline: none;
+  }
+
+  #language-selection button:active {
+    background: #3b4179;
+  }
+
+  #select-lang-text {
+    font-size: 0.85rem;
+    color: #ccc;
+    text-align: center;
+    font-style: italic;
+    user-select: none;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  /* Container for quiz */
+  .container {
+    background: rgba(17, 24, 39, 0.9);
+    padding: 30px 40px;
+    border-radius: 15px;
+    width: 440px;
+    max-width: 90vw;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    text-align: center;
+    display: none;
+    flex-direction: column;
+    position: relative;
+  }
+
+  h1 {
+    margin-bottom: 15px;
+    font-weight: 600;
+  }
+
+  #question {
+    font-size: 1.25rem;
+    margin-bottom: 28px;
+    min-height: 70px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .option-btn {
+    background: #444c6a;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 1.05rem;
+    color: #e0e0e0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  }
+
+  .option-btn:hover {
+    background: #57618d;
+  }
+
+  .option-btn.correct {
+    background-color: #4caf50;
+    color: white;
+    cursor: default;
+    box-shadow: 0 0 15px #4caf50aa;
+  }
+  .option-btn.incorrect {
+    background-color: #f44336;
+    color: white;
+    cursor: default;
+    box-shadow: 0 0 15px #f44336aa;
+  }
+
+  .disabled {
+    pointer-events: none;
+    opacity: 0.75;
+  }
+
+  .score-timer {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    margin-bottom: 26px;
+    font-size: 1.1rem;
+  }
+
+  #timer {
+    color: #ffdd57;
+  }
+
+  #result-screen {
+    display: none;
+    flex-direction: column;
+    gap: 22px;
+    font-size: 1.3rem;
+  }
+
+  #result-screen.show {
+    display: flex;
+  }
+
+  button#restart-btn,
+  button#generate-certificate-btn,
+  button#cert-restart-btn,
+  button#download-certificate-btn {
+    background: #667eea;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 28px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102,126,234,0.75);
+  }
+
+  button#restart-btn:hover,
+  button#generate-certificate-btn:hover,
+  button#cert-restart-btn:hover,
+  button#download-certificate-btn:hover {
+    background: #5a6bd1;
+  }
+
+  /* Certificate screen */
+  #certificate-screen {
+    display: none;
+    background: rgba(255 255 255 / 0.95);
+    color: #222;
+    padding: 40px 30px;
+    border-radius: 18px;
+    width: 440px;
+    max-width: 90vw;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    text-align: center;
+    font-family: 'Georgia', serif;
+    user-select: none;
+    flex-direction: column;
+    position: relative;
+  }
+
+  #certificate-screen.show {
+    display: flex;
+  }
+
+  #cert-above-title {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #334075;
+    margin-bottom: 10px;
+    user-select: none;
+  }
+
+  #cert-header {
+    font-size: 2.2rem;
+    color: #334075;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  #cert-desc {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #555;
+  }
+
+  #cert-name-input,
+  #cert-name-text {
+    font-size: 1.5rem;
+    padding: 8px 12px;
+    width: 80%;
+    max-width: 320px;
+    margin: 0 auto 25px;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    color: #222;
+  }
+
+  #cert-name-text {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+    display: none;
+  }
+
+  .cert-footer-small {
+    font-size: 0.85rem;
+    color: #777;
+    margin-top: 25px;
+    user-select: text;
+  }
+
+  .cert-footer-large {
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: #444;
+    margin-top: 6px;
+    user-select: text;
+  }
+
+  #cert-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  footer {
+    margin-top: auto;
+    font-size: 0.85rem;
+    color: #999;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+  <header role="banner" aria-label="Quiz Game Header">
+    <h1>MICRO IT INTERNSHIP</h1>
+    <h2>Welcome to Quiz</h2>
+    <div id="language-selection" role="radiogroup" aria-label="Select Quiz Language">
+      <button type="button" id="btn-python" role="radio" aria-checked="false" tabindex="0">Python</button>
+      <button type="button" id="btn-java" role="radio" aria-checked="false" tabindex="-1">Java</button>
+      <button type="button" id="btn-html" role="radio" aria-checked="false" tabindex="-1">HTML</button>
+    </div>
+    <div id="select-lang-text">select a language to start the quiz</div>
+  </header>
+
+  <div class="container" role="main" aria-live="polite" aria-label="Quiz Container">
+    <div class="score-timer">
+      <div>Score: <span id="score">0</span></div>
+      <div>Time Left: <span id="timer">15</span>s</div>
+    </div>
+
+    <div id="quiz">
+      <div id="question">Loading question...</div>
+      <div class="options" id="options"></div>
+    </div>
+
+    <div id="result-screen" aria-live="assertive" aria-atomic="true">
+      <div id="final-score"></div>
+      <button id="restart-btn" aria-label="Restart Quiz">Restart Quiz</button>
+      <button id="generate-certificate-btn" style="display:none;" aria-label="Generate Certificate">Generate Certificate</button>
+    </div>
+  </div>
+
+  <div id="certificate-screen" role="dialog" aria-modal="true" aria-labelledby="cert-above-title cert-header" aria-describedby="cert-desc">
+    <div id="cert-above-title">MICRO IT</div>
+    <h1 id="cert-header">Certificate of Completion</h1>
+    <input type="text" id="cert-name-input" placeholder="Enter your name" aria-label="Enter your name for the certificate" />
+    <div id="cert-name-text" aria-hidden="true"></div>
+    <p id="cert-desc"></p>
+    <div id="cert-buttons">
+      <button id="download-certificate-btn" aria-label="Download Certificate">Download Certificate</button>
+      <button id="cert-restart-btn" aria-label="Restart Quiz">Restart Quiz</button>
+    </div>
+    <div class="cert-footer-small" aria-hidden="true">powered by: Micro IT</div>
+    <div class="cert-footer-large" aria-hidden="true">***** Micro IT Internship Project *****</div>
+  </div>
+
+  <footer>
+    &copy; 2025 Quiz Game - Have fun!
+  </footer>
+
+  <!-- html2canvas from CDN for certificate download -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <script>
+    (() => {
+      const questions = {
+        python: [
+          { question: "Which keyword is used to define a function in Python?", options: ["func", "def", "function", "define"], answer: 1 },
+          { question: "Which data type is immutable in Python?", options: ["List", "Dictionary", "Tuple", "Set"], answer: 2 },
+          { question: "What does 'PEP' in Python stands for?", options: ["Python Enhancement Proposal", "Programming Easy Python", "Python Event Processing", "Private Execution Protocol"], answer: 0 },
+          { question: "What symbol is used for comments in Python?", options: ["//", "#", "/*", "<!--"], answer: 1 },
+          { question: "What is the output type of the expression 3 / 2 in Python 3?", options: ["int", "float", "string", "boolean"], answer: 1 },
+          { question: "Which of these is NOT a Python built-in data type?", options: ["list", "tuple", "queue", "dictionary"], answer: 2 },
+          { question: "What is the correct file extension of Python files?", options: [".pt", ".pyth", ".py", ".pyt"], answer: 2 },
+          { question: "How do you start a for loop in Python?", options: ["for(i=0; i<n; i++)", "for x in range(n):", "foreach x in n", "loop from 0 to n"], answer: 1 },
+          { question: "Which operator is used for exponentiation in Python?", options: ["^", "**", "pow()", "//"], answer: 1 },
+          { question: "What function prints output to the console in Python?", options: ["echo()", "console.log()", "print()", "output()"], answer: 2 },
+          { question: "How do you insert an element at the end of a list?", options: ["list.append()", "list.add()", "list.insert()", "list.push()"], answer: 0 },
+          { question: "Which of these is a keyword in Python?", options: ["function", "lambda", "void", "var"], answer: 1 },
+          { question: "What will 'len([1, 2, 3])' return?", options: ["2", "3", "1", "Error"], answer: 1 },
+          { question: "What does the 'break' statement do in a loop?", options: ["Skips to next iteration", "Exits the loop", "Pauses the loop", "Restarts the loop"], answer: 1 },
+          { question: "Which module is used for regular expressions?", options: ["regex", "re", "regexp", "pyregex"], answer: 1 },
+          { question: "What is the output of 'bool(0)'?", options: ["True", "False", "0", "None"], answer: 1 },
+          { question: "Which data structure does 'set' represent?", options: ["Ordered list", "Unordered unique elements", "Key-value pairs", "Indexed elements"], answer: 1 },
+          { question: "Which of these is NOT a valid variable name in Python?", options: ["my_var", "2var", "_myvar", "var2"], answer: 1 },
+          { question: "What does the 'pass' statement do?", options: ["Ends the function", "Does nothing, placeholder", "Raises an error", "Returns None"], answer: 1 },
+          { question: "What is the output of 'type([])'?", options: ["list", "array", "tuple", "dict"], answer: 0 }
+        ],
+
+        java: [
+          { question: "Which keyword is used to create a subclass in Java?", options: ["subclass", "extends", "implements", "inherits"], answer: 1 },
+          { question: "Which of these is NOT a Java primitive type?", options: ["int", "byte", "String", "boolean"], answer: 2 },
+          { question: "What method is the entry point for a Java application?", options: ["start()", "run()", "main()", "init()"], answer: 2 },
+          { question: "Which exception is thrown when dividing an integer by zero?", options: ["NullPointerException", "ArithmeticException", "IllegalArgumentException", "ArrayIndexOutOfBoundsException"], answer: 1 },
+          { question: "What keyword indicates a constant value?", options: ["constant", "static", "final", "const"], answer: 2 },
+          { question: "Which collection stores key-value pairs?", options: ["List", "Set", "Map", "Vector"], answer: 2 },
+          { question: "What is the size in bits of an int in Java?", options: ["8 bits", "16 bits", "32 bits", "64 bits"], answer: 2 },
+          { question: "What does the 'static' keyword mean?", options: ["Instance variable", "Class-level variable or method", "Method override", "Abstract method"], answer: 1 },
+          { question: "Which loop executes at least once?", options: ["for", "while", "do-while", "foreach"], answer: 2 },
+          { question: "What does 'this' keyword refer to?", options: ["Current package", "Current class instance", "Superclass", "Static variable"], answer: 1 },
+          { question: "Which access modifier allows visibility from anywhere?", options: ["private", "protected", "public", "default"], answer: 2 },
+          { question: "What package is automatically imported in every Java program?", options: ["java.lang", "java.util", "java.io", "java.net"], answer: 0 },
+          { question: "Which of these is NOT a valid identifier?", options: ["MyVar", "2Var", "_myvar", "$value"], answer: 1 },
+          { question: "What is the default value of a boolean variable?", options: ["true", "false", "null", "0"], answer: 1 },
+          { question: "Which keyword is used to inherit an interface?", options: ["inherit", "extends", "implements", "interface"], answer: 2 },
+          { question: "What is an abstract class?", options: ["Class that cannot be instantiated", "Class without methods", "Class with only static methods", "Class which is final"], answer: 0 },
+          { question: "Which of these is a marker interface?", options: ["Serializable", "Runnable", "Cloneable", "Comparator"], answer: 0 },
+          { question: "How to declare an array of integers?", options: ["int arr[];", "int arr();", "int[] arr", "array int[] arr;"], answer: 2 },
+          { question: "Which of these exceptions is checked?", options: ["NullPointerException", "IOException", "ArrayIndexOutOfBoundsException", "IllegalArgumentException"], answer: 1 },
+          { question: "What keyword is used to handle exceptions?", options: ["catch", "exception", "throw", "handle"], answer: 0 }
+        ],
+
+        html: [
+          { question: "What does HTML stand for?", options: ["Hyperlinks and Text Markup Language", "Hyper Text Markup Language", "Home Tool Markup Language", "Hyper Tool Multi Language"], answer: 1 },
+          { question: "Which HTML element is used to define the most important heading?", options: ["&lt;head&gt;", "&lt;h1&gt;", "&lt;header&gt;", "&lt;title&gt;"], answer: 1 },
+          { question: "Which attribute is used to provide a unique identifier to an HTML element?", options: ["class", "id", "name", "key"], answer: 1 },
+          { question: "What tag is used to insert an image?", options: ["&lt;img&gt;", "&lt;image&gt;", "&lt;picture&gt;", "&lt;src&gt;"], answer: 0 },
+          { question: "Which element defines a hyperlink?", options: ["&lt;link&gt;", "&lt;a&gt;", "&lt;href&gt;", "&lt;url&gt;"], answer: 1 },
+          { question: "What does the &lt;br&gt; tag do?", options: ["Bold text", "Add a line break", "Create a paragraph", "Add a blockquote"], answer: 1 },
+          { question: "Which tag is used for an unordered list?", options: ["&lt;ol&gt;", "&lt;ul&gt;", "&lt;li&gt;", "&lt;list&gt;"], answer: 1 },
+          { question: "The &lt;div&gt; tag is used for?", options: ["Creating a hyperlink", "Defining a division or section", "Adding an image", "Inserting a line break"], answer: 1 },
+          { question: "Which tag defines a table row?", options: ["&lt;tr&gt;", "&lt;td&gt;", "&lt;table&gt;", "&lt;th&gt;"], answer: 0 },
+          { question: "How do you make a numbered list?", options: ["&lt;ul&gt;", "&lt;ol&gt;", "&lt;list&gt;", "&lt;nl&gt;"], answer: 1 },
+          { question: "Which attribute specifies the URL of a link?", options: ["href", "src", "link", "url"], answer: 0 },
+          { question: "What does the &lt;head&gt; element contain?", options: ["Main content", "Metadata and links", "Navigation menu", "Footer content"], answer: 1 },
+          { question: "Which tag is used to define a paragraph?", options: ["&lt;p&gt;", "&lt;para&gt;", "&lt;text&gt;", "&lt;br&gt;"], answer: 0 },
+          { question: "How do you define a comment in HTML?", options: ["// comment", "&lt;!-- comment --&gt;", "# comment", "/* comment */"], answer: 1 },
+          { question: "Which tag is deprecated in HTML5?", options: ["&lt;b&gt;", "&lt;u&gt;", "&lt;font&gt;", "&lt;i&gt;"], answer: 2 },
+          { question: "Which tag is used to embed a video?", options: ["&lt;video&gt;", "&lt;media&gt;", "&lt;embed&gt;", "&lt;source&gt;"], answer: 0 },
+          { question: "Which attribute is used to open a link in a new tab?", options: ["new", "target='_blank'", "tab", "open"], answer: 1 },
+          { question: "What is the correct HTML element for inserting a horizontal rule?", options: ["&lt;hr&gt;", "&lt;line&gt;", "&lt;rule&gt;", "&lt;break&gt;"], answer: 0 },
+          { question: "Which element is used to specify a footer for a document or section?", options: ["&lt;footer&gt;", "&lt;bottom&gt;", "&lt;section&gt;", "&lt;aside&gt;"], answer: 0 },
+          { question: "How can you make a numbered list start at a specific number?", options: ["start attribute in &lt;ol&gt;", "value attribute in &lt;li&gt;", "&lt;number&gt; tag", "offset attribute"], answer: 0 }
+        ]
+      };
+
+      const scoreEl = document.getElementById('score');
+      const timerEl = document.getElementById('timer');
+      const questionEl = document.getElementById('question');
+      const optionsEl = document.getElementById('options');
+      const resultScreen = document.getElementById('result-screen');
+      const finalScoreEl = document.getElementById('final-score');
+      const restartBtn = document.getElementById('restart-btn');
+      const genCertBtn = document.getElementById('generate-certificate-btn');
+      const quizContainer = document.querySelector('.container');
+      const languageSelection = document.getElementById('language-selection');
+      const langButtons = languageSelection.querySelectorAll('button');
+      const certScreen = document.getElementById('certificate-screen');
+      const certDesc = document.getElementById('cert-desc');
+      const certRestartBtn = document.getElementById('cert-restart-btn');
+      const certNameInput = document.getElementById('cert-name-input');
+      const certNameText = document.getElementById('cert-name-text');
+      const downloadCertBtn = document.getElementById('download-certificate-btn');
+      const certButtonsDiv = document.getElementById('cert-buttons');
+
+      let currentQuestionIndex = 0;
+      let score = 0;
+      let timer;
+      let timeLeft = 15;
+      const questionTime = 15;
+
+      let currentLanguage = null;
+      let currentQuestionSet = [];
+      let originalQuestionSet = [];
+
+      function startTimer() {
+        timeLeft = questionTime;
+        timerEl.textContent = timeLeft;
+        timer = setInterval(() => {
+          timeLeft--;
+          timerEl.textContent = timeLeft;
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            revealAnswer(-1); // Timeout, no answer
+          }
+        }, 1000);
+      }
+
+      function loadQuestion() {
+        if (currentQuestionIndex >= currentQuestionSet.length) {
+          endQuiz();
+          return;
+        }
+
+        const q = currentQuestionSet[currentQuestionIndex];
+        questionEl.textContent = q.question;
+        optionsEl.innerHTML = '';
+
+        q.options.forEach((option, idx) => {
+          const btn = document.createElement('button');
+          btn.className = 'option-btn';
+          btn.textContent = option;
+          btn.setAttribute('data-index', idx);
+          btn.setAttribute('aria-label', `Answer option ${option}`);
+          btn.onclick = () => {
+            clearInterval(timer);
+            revealAnswer(idx);
+          };
+          optionsEl.appendChild(btn);
+        });
+
+        enableOptions(true);
+        startTimer();
+      }
+
+      function revealAnswer(selectedIdx) {
+        enableOptions(false);
+        const q = currentQuestionSet[currentQuestionIndex];
+        const allOptionBtns = optionsEl.querySelectorAll('.option-btn');
+
+        allOptionBtns.forEach(btn => {
+          const idx = parseInt(btn.getAttribute('data-index'), 10);
+          btn.classList.remove('correct', 'incorrect');
+          if (idx === q.answer) {
+            btn.classList.add('correct');
+          }
+          if (idx === selectedIdx && idx !== q.answer) {
+            btn.classList.add('incorrect');
+          }
+        });
+
+        if (selectedIdx === q.answer) {
+          score++;
+          scoreEl.textContent = score;
+        }
+
+        // Wait 2 seconds then load next question
+        setTimeout(() => {
+          currentQuestionIndex++;
+          loadQuestion();
+        }, 2000);
+      }
+
+      function enableOptions(enable) {
+        const allOptionBtns = optionsEl.querySelectorAll('.option-btn');
+        allOptionBtns.forEach(btn => {
+          btn.disabled = !enable;
+          if (enable) {
+            btn.classList.remove('correct', 'incorrect');
+            btn.classList.remove('disabled');
+          } else {
+            btn.classList.add('disabled');
+          }
+        });
+      }
+
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      function endQuiz() {
+        quizContainer.querySelector('#quiz').style.display = 'none';
+        resultScreen.classList.add('show');
+        if (score < 10) {
+          finalScoreEl.textContent = `You scored ${score} out of ${currentQuestionSet.length}. You Failed.`;
+          restartBtn.style.display = 'inline-block';
+          genCertBtn.style.display = 'none';
+        } else {
+          finalScoreEl.textContent = `Congratulations! You scored ${score} out of ${currentQuestionSet.length}. You Passed!`;
+          restartBtn.style.display = 'none';
+          genCertBtn.style.display = 'inline-block';
+          genCertBtn.focus();
+        }
+      }
+
+      function restartQuiz() {
+        score = 0;
+        currentQuestionIndex = 0;
+        scoreEl.textContent = score;
+        resultScreen.classList.remove('show');
+        quizContainer.querySelector('#quiz').style.display = 'block';
+        currentQuestionSet = [...originalQuestionSet];
+        shuffleArray(currentQuestionSet);
+        loadQuestion();
+
+        // Reset certificate name input display and text
+        certNameInput.style.display = 'block';
+        certNameText.style.display = 'none';
+        certNameInput.value = '';
+        updateCertificateText('');
+        certScreen.classList.remove('show');
+        quizContainer.style.display = 'flex';
+      }
+
+      function selectLanguage(lang) {
+        currentLanguage = lang;
+        originalQuestionSet = questions[lang];
+        currentQuestionSet = [...originalQuestionSet];
+        shuffleArray(currentQuestionSet);
+        langButtons.forEach(btn => {
+          const btnLang = btn.id.split('-')[1];
+          const isSelected = btnLang === lang;
+          btn.setAttribute('aria-checked', isSelected.toString());
+          btn.tabIndex = isSelected ? 0 : -1;
+        });
+        languageSelection.style.display = 'none';
+        document.getElementById('select-lang-text').style.display = 'none';
+        quizContainer.style.display = 'flex';
+        restartQuiz();
+      }
+
+      function generateCertificate() {
+        quizContainer.style.display = 'none';
+        resultScreen.classList.remove('show');
+        certScreen.classList.add('show');
+        certNameInput.value = '';
+        certNameInput.style.display = 'block';
+        certNameText.style.display = 'none';
+        updateCertificateText('');
+        certNameInput.focus();
+      }
+
+      function updateCertificateText(name) {
+        if (name.trim() === '') {
+          certDesc.textContent = `This certifies that the participant has successfully passed the ${currentLanguage.toUpperCase()} quiz with a score of ${score} out of ${currentQuestionSet.length}.`;
+          certNameText.textContent = '';
+          certNameText.style.display = 'none';
+          certNameInput.style.display = 'block';
+        } else {
+          certDesc.textContent = `This certifies that ${name.trim()} has successfully passed the ${currentLanguage.toUpperCase()} quiz with a score of ${score} out of ${currentQuestionSet.length}.`;
+          certNameText.textContent = name.trim();
+          certNameText.style.display = 'block';
+          certNameInput.style.display = 'none';
+        }
+      }
+
+      function finalizeNameInput() {
+        const name = certNameInput.value.trim();
+        if (name !== '') {
+          updateCertificateText(name);
+        } else {
+          certNameText.textContent = '';
+          certNameText.style.display = 'none';
+          certNameInput.style.display = 'block';
+        }
+      }
+
+      function downloadCertificate() {
+        // Temporarily hide cert-buttons to not appear in image
+        const certButtonsDiv = document.getElementById('cert-buttons');
+        certButtonsDiv.style.display = 'none';
+
+        // Show name text span and hide input for clean capture
+        if (certNameInput.style.display !== 'none') {
+          finalizeNameInput();
+        }
+
+        html2canvas(certScreen, {scale: 2}).then(canvas => {
+          certButtonsDiv.style.display = 'flex'; // restore
+          canvas.toBlob(function(blob) {
+            const filename = `Certificate_${currentLanguage}_${(certNameText.textContent || 'Participant').replace(/\s+/g, '_') || 'Certificate'}.png`;
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            URL.revokeObjectURL(link.href);
+          });
+        });
+      }
+
+      // Animate background gradient colors slowly cycling every second
+      let gradientIndex = 0;
+      const gradients = [
+        ['#667eea', '#764ba2'],
+        ['#764ba2', '#667eea'],
+        ['#2b5876', '#4e4376'],
+        ['#4e4376', '#2b5876'],
+        ['#8e2de2', '#4a00e0'],
+        ['#4a00e0', '#8e2de2']
+      ];
+      function updateBackgroundGradient() {
+        gradientIndex = (gradientIndex + 1) % gradients.length;
+        const g = gradients[gradientIndex];
+        document.body.style.background = `linear-gradient(135deg, ${g[0]}, ${g[1]})`;
+      }
+      setInterval(updateBackgroundGradient, 1000);
+
+      // Attach event handlers
+      langButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectLanguage(btn.id.split('-')[1]);
+        });
+
+        btn.addEventListener('keydown', (e) => {
+          const focusIndex = Array.from(langButtons).indexOf(document.activeElement);
+          if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextIndex = (focusIndex + 1) % langButtons.length;
+            langButtons[nextIndex].focus();
+          } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevIndex = (focusIndex - 1 + langButtons.length) % langButtons.length;
+            langButtons[prevIndex].focus();
+          } else if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            selectLanguage(btn.id.split('-')[1]);
+          }
+        });
+      });
+
+      restartBtn.addEventListener('click', () => {
+        restartQuiz();
+      });
+
+      genCertBtn.addEventListener('click', () => {
+        generateCertificate();
+      });
+
+      certRestartBtn.addEventListener('click', () => {
+        certScreen.classList.remove('show');
+        certNameInput.style.display = 'block';
+        certNameText.style.display = 'none';
+        quizContainer.style.display = 'flex';
+        restartQuiz();
+      });
+
+      certNameInput.addEventListener('blur', () => {
+        finalizeNameInput();
+      });
+
+      certNameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          finalizeNameInput();
+          certRestartBtn.focus();
+        }
+      });
+
+      downloadCertBtn.addEventListener('click', () => {
+        downloadCertificate();
+      });
+
+    })();
+  </script>
+</body>
+</html>
+
